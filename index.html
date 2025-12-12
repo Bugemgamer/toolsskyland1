@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sky Land Tools V3.2 Final</title>
+<style>
+  body{
+    font-family:'Poppins',sans-serif;
+    background:linear-gradient(135deg,#4b0082,#6a0dad);
+    color:#fff;
+    text-align:center;
+    margin:0;
+    padding:0;
+  }
+  .container{max-width:900px;margin:40px auto;padding:20px}
+  h1{text-transform:uppercase;font-weight:700;font-size:28px;margin-bottom:8px;text-shadow:0 0 12px rgba(255,255,255,.4)}
+  p.subtitle{opacity:.9;margin-bottom:25px}
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+    margin-bottom:25px;
+  }
+  .card{
+    background:rgba(255,255,255,.12);
+    border-radius:15px;
+    padding:18px;
+    box-shadow:0 4px 10px rgba(0,0,0,.25);
+    transition:.2s;
+  }
+  .card h3{font-size:15px;font-weight:700;margin-bottom:10px}
+  .card pre{text-align:left;font-size:13px;white-space:pre-wrap;word-wrap:break-word}
+  .card.update{animation:pulseGlow .8s ease}
+  @keyframes pulseGlow{
+    0%{box-shadow:0 0 0 rgba(255,255,255,0);transform:scale(1)}
+    50%{box-shadow:0 0 18px rgba(255,255,255,.4);transform:scale(1.03)}
+    100%{box-shadow:0 0 0 rgba(255,255,255,0);transform:scale(1)}
+  }
+  .control{
+    background:rgba(255,255,255,.1);
+    border-radius:15px;
+    padding:20px;
+    box-shadow:0 4px 10px rgba(0,0,0,.2);
+    margin-bottom:30px;
+  }
+  .buttons button,label[for=fileInput]{
+    border:none;
+    padding:10px 20px;
+    margin:5px;
+    border-radius:8px;
+    cursor:pointer;
+    color:#fff;
+    font-weight:700;
+    text-transform:uppercase;
+    transition:.2s;
+  }
+  .upload-btn,label[for=fileInput]{background:#ffb300}
+  .start-btn{background:#28a745}
+  .pause-btn{background:#ff9800}
+  .stop-btn{background:#f44336}
+  .reset-btn{background:#9c27b0}
+  .save-btn{background:#2196f3}
+  .anticlone-btn{background:#00bcd4}
+  .buttons button:hover,label[for=fileInput]:hover{transform:scale(1.05);opacity:.9}
+  input[type=file]{display:none}
+  #comboInfo{margin-top:10px;font-size:13px;opacity:.9}
+
+  /* 🌈 Progress bar */
+  .progress-wrapper{position:relative;margin:25px auto;max-width:500px}
+  .progress-container{
+    width:100%;height:25px;border-radius:15px;overflow:hidden;
+    background:rgba(255,255,255,.1);box-shadow:0 0 10px rgba(255,255,255,.2)
+  }
+  .progress-bar{
+    width:0;height:100%;border-radius:15px;
+    background:linear-gradient(90deg,#a370ff,#ff77d9,#6cf);
+    background-size:200% 100%;animation:glowmove 2s linear infinite;
+    transition:width .25s ease;
+  }
+  @keyframes glowmove{
+    0%{background-position:0 50%}
+    100%{background-position:200% 50%}
+  }
+  .progress-text-center{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    font-size:20px;font-weight:700;text-shadow:0 0 10px rgba(255,255,255,.8)
+  }
+  .progress-info{margin-top:10px;font-size:14px;opacity:.9}
+
+  /* 🔘 Floating WA button */
+  .floating-btn{
+    position:fixed;bottom:20px;right:20px;width:60px;height:60px;
+    border-radius:50%;background:#25d366;
+    box-shadow:0 0 20px rgba(37,211,102,.6);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;transition:.3s;
+  }
+  .floating-btn:hover{transform:scale(1.1);box-shadow:0 0 30px rgba(37,211,102,.9)}
+  .floating-btn img{width:35px;height:35px}
+  .tooltip{
+    position:absolute;bottom:80px;right:0;background:rgba(0,0,0,.75);
+    color:#fff;padding:6px 12px;border-radius:8px;font-size:13px;
+    opacity:0;transform:translateY(10px);transition:all .3s ease;
+  }
+  .floating-btn:hover .tooltip{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Sky Land Tools Filter Combo Berinfo</h1>
+  <p class="subtitle">Tools Ini Cuma Buat Filter Combo Berinfo Bukan Tools Cek</p>
+
+  <div class="stats">
+    <div class="card" id="cardSkin"><h3>INFO SKIN COMBO</h3><pre id="skinInfo">-</pre></div>
+    <div class="card" id="cardLevel"><h3>INFO LEVEL COMBO</h3><pre id="levelInfo">-</pre></div>
+    <div class="card" id="cardV2L"><h3>INFO V2L COMBO</h3><pre id="v2lInfo">-</pre></div>
+    <div class="card" id="cardRank"><h3>INFO RANK COMBO</h3><pre id="rankInfo">-</pre></div>
+    <div class="card" id="cardOwn"><h3>INFO OWN STATUS</h3><pre id="ownInfo">-</pre></div>
+    <div class="card" id="cardBan"><h3>INFO BAN STATUS</h3><pre id="banInfo">-</pre></div>
+    <div class="card"><h3>TOTAL COMBO</h3><pre id="totalCombo">0</pre></div>
+  </div>
+
+  <div class="progress-wrapper">
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+      <div class="progress-text-center" id="progressPercent">0%</div>
+    </div>
+    <div class="progress-info" id="progressInfo">
+      ⏱ Estimasi: -  — ⚡ Kecepatan: -
+    </div>
+  </div>
+
+  <div class="control">
+    <div class="buttons">
+      <label for="fileInput">UPLOAD COMBO</label>
+      <button class="start-btn" id="startBtn">START</button>
+      <button class="pause-btn" id="pauseBtn">PAUSE</button>
+      <button class="stop-btn" id="stopBtn">STOP</button>
+      <button class="reset-btn" id="resetBtn">RESET</button>
+      <button class="save-btn" id="saveBtn">SAVE</button>
+      <button class="anticlone-btn" id="antiCloneBtn">ANTICLONE: OFF</button>
+    </div>
+    <input type="file" id="fileInput" accept=".txt" multiple />
+    <p id="comboInfo">Belum ada combo diunggah.</p>
+  </div>
+</div>
+
+<div class="floating-btn"
+     onclick="window.open('https://chat.whatsapp.com/L27ij0iHAMEGBz8G6ZS05g?mode=ems_copy_t','_blank')">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" />
+  <div class="tooltip">Join Grup Sky Land</div>
+</div>
+<script>
+let isPaused = false;
+let antiClone = false;
+let allLines = [];
+let allAccounts = [];
+let uniqueAccounts = new Set();
+let progress = 0;
+
+// ====== BUTTONS ======
+document.getElementById("antiCloneBtn").addEventListener("click", () => {
+  antiClone = !antiClone;
+  document.getElementById("antiCloneBtn").textContent = `ANTICLONE: ${antiClone ? "ON" : "OFF"}`;
+});
+document.getElementById("resetBtn").addEventListener("click", resetAll);
+document.getElementById("fileInput").addEventListener("change", handleFiles);
+document.getElementById("startBtn").addEventListener("click", startProcessing);
+document.getElementById("pauseBtn").addEventListener("click", () => isPaused = !isPaused);
+document.getElementById("stopBtn").addEventListener("click", resetAll);
+document.getElementById("saveBtn").addEventListener("click", showSaveModal);
+
+// ====== DATA ======
+const skinRange = { "<100": 0, "100": 0, "101-200": 0, "201-300": 0, "301-400": 0, "401-500": 0, "501-600": 0, "601-700": 0, "701-800": 0, "801-900": 0, "901+": 0 };
+const levelRange = { "1-10": 0, "11-30": 0, "31-40": 0, "41-50": 0, "51-60": 0, "61-70": 0, "71-80": 0, "81-100": 0, "100+": 0 };
+const v2lCount = { ON: 0, OFF: 0 };
+const rankCount = { Warrior: 0, Elite: 0, Grandmaster: 0, Epic: 0, Legend: 0, Mythic: 0 };
+const ownCount = { ON: 0, OFF: 0 };
+const banCount = { ON: 0, OFF: 0 };
+
+async function handleFiles(e) {
+  const files = e.target.files;
+  allLines = [];
+  let totalLines = 0;
+  const totalFiles = files.length;
+  document.getElementById("comboInfo").textContent = "Membaca file...";
+
+  for (const [i, file] of Array.from(files).entries()) {
+    const text = await file.text();
+    const lines = text.split(/\r?\n/).filter(l => l.trim().length);
+    allLines.push(...lines);
+    totalLines += lines.length;
+
+    // progress info tetap muncul setiap 10 file
+    if ((i + 1) % 10 === 0 || i + 1 === totalFiles) {
+      document.getElementById("comboInfo").textContent =
+        `📂 Membaca ${i + 1}/${totalFiles} file... (${totalLines.toLocaleString()} baris)`;
+      await new Promise(r => setTimeout(r, 5)); // agar UI sempat update
+    }
+  }
+
+  // lanjut fungsi aslimu
+  groupAccounts(); // jangan ubah, biarkan seperti di file asli
+  document.getElementById("comboInfo").textContent =
+    `File: ${totalFiles} — Total akun: ${allAccounts.length.toLocaleString()}`;
+  document.getElementById("totalCombo").textContent = allAccounts.length;
+}
+
+function groupAccounts() {
+  allAccounts = [];
+  let current = [];
+  for (let line of allLines) {
+    if (/@/.test(line) && line.includes(":")) {
+      if (current.length) allAccounts.push(current.join("\n"));
+      current = [line];
+    } else current.push(line);
+  }
+  if (current.length) allAccounts.push(current.join("\n"));
+}
+
+function resetAll() {
+  progress = 0;
+  allLines = [];
+  allAccounts = [];
+  uniqueAccounts.clear();
+  Object.keys(skinRange).forEach(k => skinRange[k] = 0);
+  Object.keys(levelRange).forEach(k => levelRange[k] = 0);
+  Object.keys(v2lCount).forEach(k => v2lCount[k] = 0);
+  Object.keys(rankCount).forEach(k => rankCount[k] = 0);
+  Object.keys(ownCount).forEach(k => ownCount[k] = 0);
+  Object.keys(banCount).forEach(k => banCount[k] = 0);
+  updateDisplay();
+  document.getElementById("comboInfo").textContent = "Sudah direset.";
+  updateProgress(0);
+}
+
+async function startProcessing() {
+  if (!allAccounts.length) return alert("Upload file dulu!");
+  progress = 0;
+  const total = allAccounts.length;
+  const startTime = Date.now();
+
+  for (let i = 0; i < total; i++) {
+    if (isPaused) { await new Promise(r => setTimeout(r, 300)); i--; continue; }
+
+    const acc = allAccounts[i];
+    if (antiClone) {
+      if (uniqueAccounts.has(acc)) continue;
+      uniqueAccounts.add(acc);
+    }
+
+    parseAccount(acc);
+    progress++;
+    const percent = Math.floor((progress / total) * 100);
+    updateProgress(percent);
+    if (i % 5 === 0) updateDisplay();
+    await new Promise(r => setTimeout(r, 10));
+  }
+
+  updateDisplay();
+  const elapsed = (Date.now() - startTime) / 1000;
+  const speed = Math.round(total / elapsed * 100) / 100;
+  document.getElementById("progressInfo").textContent = `⏱ Estimasi: ${elapsed.toFixed(1)}s — ⚡ ${speed} akun/s`;
+}
+
+function parseAccount(block) {
+  const text = block.trim();
+
+  // SKIN
+  const skinMatch = text.match(/\b(Skins?|Skin Count)\b\s*:\s*(\d+)/i);
+  if (skinMatch) {
+    const s = parseInt(skinMatch[2]);
+    if (s < 100) skinRange["<100"]++;
+    else if (s === 100) skinRange["100"]++;
+    else if (s <= 200) skinRange["101-200"]++;
+    else if (s <= 300) skinRange["201-300"]++;
+    else if (s <= 400) skinRange["301-400"]++;
+    else if (s <= 500) skinRange["401-500"]++;
+    else if (s <= 600) skinRange["501-600"]++;
+    else if (s <= 700) skinRange["601-700"]++;
+    else if (s <= 800) skinRange["701-800"]++;
+    else if (s <= 900) skinRange["801-900"]++;
+    else skinRange["901+"]++;
+  }
+
+  // LEVEL
+  const lvlMatch = text.match(/\b(Level|Lvl)\b\s*:\s*(\d+)/i);
+  if (lvlMatch) {
+    const l = parseInt(lvlMatch[2]);
+    if (l <= 10) levelRange["1-10"]++;
+    else if (l <= 30) levelRange["11-30"]++;
+    else if (l <= 40) levelRange["31-40"]++;
+    else if (l <= 50) levelRange["41-50"]++;
+    else if (l <= 60) levelRange["51-60"]++;
+    else if (l <= 70) levelRange["61-70"]++;
+    else if (l <= 80) levelRange["71-80"]++;
+    else if (l <= 100) levelRange["81-100"]++;
+    else levelRange["100+"]++;
+  }
+
+  // V2L
+  const v2lMatch = text.match(/\bV2L(?:\s*Status|\s*State|\s*Enabled)?\b\s*:\s*([A-Za-z]+)/i);
+  if (v2lMatch) {
+    const v = v2lMatch[1].toLowerCase();
+    if (/on|true|enabled|yes/.test(v)) v2lCount.ON++;
+    else if (/off|false|disabled|no/.test(v)) v2lCount.OFF++;
+  }
+
+  // RANK
+  const rankMatch = text.match(/\b(?:Rank|Current Rank|Current Tier|HRank)\b\s*:\s*([A-Za-z]+)/i);
+  if (rankMatch) {
+    const r = rankMatch[1].toLowerCase();
+    for (const key of Object.keys(rankCount)) {
+      if (r.includes(key.toLowerCase())) { rankCount[key]++; break; }
+    }
+  }
+
+  // OWN
+  const ownMatch = text.match(/\bLast\s+Log\s*(?:in|In)\b\s*:\s*([0-9T:\-\/.\s]+)/i);
+  if (ownMatch) {
+    const dateStr = ownMatch[1].trim().replace("WIB", "");
+    const parsed = Date.parse(dateStr);
+    if (!isNaN(parsed)) {
+      const diffDays = (Date.now() - parsed) / (1000 * 60 * 60 * 24);
+      if (diffDays > 7) ownCount.OFF++;
+      else ownCount.ON++;
+    }
+  }
+
+  // BAN
+  const banMatch = text.match(/\b(?:Banned|Ban)\b\s*:\s*([A-Za-z]+)/i);
+  if (banMatch) {
+    const b = banMatch[1].toLowerCase();
+    if (/on|true/.test(b)) banCount.ON++;
+    else if (/off|false/.test(b)) banCount.OFF++;
+  }
+}
+
+function updateDisplay() {
+  const skinText = Object.entries(skinRange).map(([k, v]) => `Skin ${k}: ${v}`).join("\n");
+  const levelText = Object.entries(levelRange).map(([k, v]) => `Level ${k}: ${v}`).join("\n");
+  const v2lText = Object.entries(v2lCount).map(([k, v]) => `${k}: ${v}`).join("\n");
+  const rankText = Object.entries(rankCount).map(([k, v]) => `${k}: ${v}`).join("\n");
+  const ownText = `Akun Own ON: ${ownCount.ON}\nAkun Own OFF: ${ownCount.OFF}`;
+  const banText = `Banned ON: ${banCount.ON}\nBanned OFF: ${banCount.OFF}`;
+
+  document.getElementById("skinInfo").textContent = skinText;
+  document.getElementById("levelInfo").textContent = levelText;
+  document.getElementById("v2lInfo").textContent = v2lText;
+  document.getElementById("rankInfo").textContent = rankText;
+  document.getElementById("ownInfo").textContent = ownText;
+  document.getElementById("banInfo").textContent = banText;
+  document.getElementById("totalCombo").textContent = antiClone ? uniqueAccounts.size : allAccounts.length;
+}
+
+function updateProgress(percent) {
+  document.getElementById("progressBar").style.width = percent + "%";
+  document.getElementById("progressPercent").textContent = percent + "%";
+}
+
+/* ---------------- SAVE MENU ---------------- */
+function showSaveModal() {
+  const modal = document.createElement("div");
+  modal.innerHTML = `
+    <div style="position:fixed;top:0;left:0;width:100%;height:100%;
+      background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:9999">
+      <div style="background:#222;padding:25px;border-radius:15px;width:300px;color:#fff;text-align:center">
+        <h3>Pilih Mode Save</h3>
+        <button id="saveUrut" style="margin:5px;padding:10px;width:100%;background:#28a745;border:none;color:#fff;font-weight:bold;border-radius:8px">💠 Urut</button>
+        <button id="saveAcak" style="margin:5px;padding:10px;width:100%;background:#ff9800;border:none;color:#fff;font-weight:bold;border-radius:8px">🔀 Acak</button>
+        <button id="saveCustom" style="margin:5px;padding:10px;width:100%;background:#2196f3;border:none;color:#fff;font-weight:bold;border-radius:8px">🎯 Custom</button>
+        <button id="cancelSave" style="margin-top:10px;padding:8px;width:100%;background:#f44336;border:none;color:#fff;border-radius:8px">Batal</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.querySelector("#cancelSave").onclick = () => modal.remove();
+  modal.querySelector("#saveUrut").onclick = () => { modal.remove(); saveMode("urut"); };
+  modal.querySelector("#saveAcak").onclick = () => { modal.remove(); saveMode("acak"); };
+  modal.querySelector("#saveCustom").onclick = () => { modal.remove(); saveMode("custom"); };
+}
+
+function saveMode(mode) {
+  let filtered = [...allAccounts];
+  if (mode === "acak") filtered.sort(() => Math.random() - 0.5);
+  if (mode === "urut") filtered.sort((a, b) => {
+    const getSkin = acc => parseInt((acc.match(/\b(Skin(?: Count)?)\b\s*:\s*(\d+)/i) || [0,0,0])[2]);
+    return getSkin(b) - getSkin(a);
+  });
+  if (mode === "custom") {
+    const input = prompt("Masukkan filter (contoh: Skin 200-300 atau Level 50-100)");
+    if (!input) return;
+    const [type, rangeStr] = input.split(" ");
+    if (!rangeStr || !/^\d+\-\d+$/.test(rangeStr)) return alert("Format salah!");
+    const [min, max] = rangeStr.split("-").map(Number);
+    filtered = filtered.filter(acc => {
+      if (/skin/i.test(type)) {
+        const skin = acc.match(/\b(Skin(?: Count)?)\b\s*:\s*(\d+)/i);
+        return skin ? parseInt(skin[2]) >= min && parseInt(skin[2]) <= max : false;
+      } else if (/level/i.test(type)) {
+        const lvl = acc.match(/\b(Level|Lvl)\b\s*:\s*(\d+)/i);
+        return lvl ? parseInt(lvl[2]) >= min && parseInt(lvl[2]) <= max : false;
+      }
+      return false;
+    });
+  }
+
+  if (!filtered.length) return alert("Tidak ada akun cocok.");
+  const blob = new Blob([filtered.join("\n\n")], { type: "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `save_${mode}_${Date.now()}.txt`;
+  a.click();
+}
+</script>
