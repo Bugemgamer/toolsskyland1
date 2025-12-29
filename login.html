@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BugemTools - Login & Daftar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #4cc9f0;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4ade80;
+            --error-color: #f87171;
+            --warning-color: #fbbf24;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: var(--transition);
+        }
+        
+        body.dark-mode {
+            background-color: var(--dark-color);
+            color: var(--light-color);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+        
+        .hero-section {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .logo i {
+            font-size: 2.2rem;
+        }
+        
+        .hero-section h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero-section p {
+            font-size: 1.1rem;
+            color: var(--gray-700);
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        body.dark-mode .hero-section p {
+            color: var(--gray-300);
+        }
+        
+        .features {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .feature i {
+            color: var(--success-color);
+            font-size: 1.2rem;
+        }
+        
+        .auth-container {
+            background-color: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+            transition: var(--transition);
+        }
+        
+        body.dark-mode .auth-container {
+            background-color: var(--gray-800);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .auth-header h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .auth-header p {
+            color: var(--gray-700);
+            font-size: 0.95rem;
+        }
+        
+        body.dark-mode .auth-header p {
+            color: var(--gray-300);
+        }
+        
+        .tabs {
+            display: flex;
+            background-color: var(--gray-100);
+            border-radius: var(--radius-md);
+            padding: 6px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        body.dark-mode .tabs {
+            background-color: var(--gray-700);
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            z-index: 1;
+            position: relative;
+        }
+        
+        .tab.active {
+            color: var(--primary-color);
+        }
+        
+        .tab-slider {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: calc(50% - 6px);
+            height: calc(100% - 12px);
+            background-color: white;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        
+        body.dark-mode .tab-slider {
+            background-color: var(--gray-800);
+        }
+        
+        .tab-slider.register {
+            transform: translateX(calc(100% + 6px));
+        }
+        
+        .form-container {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .form {
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            animation: slideIn 0.4s ease;
+        }
+        
+        .form.active {
+            display: flex;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: white;
+            color: var(--dark-color);
+        }
+        
+        body.dark-mode .input-group input {
+            background-color: var(--gray-700);
+            border-color: var(--gray-600);
+            color: var(--light-color);
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+        }
+        
+        .input-group i {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+        }
+        
+        .password-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--gray-500);
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .btn {
+            padding: 14px 24px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+            width: 100%;
+        }
+        
+        .btn-success:hover {
+            background-color: #22c55e;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+            color: var(--gray-500);
+            font-size: 0.9rem;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background-color: var(--gray-200);
+        }
+        
+        body.dark-mode .divider::before,
+        body.dark-mode .divider::after {
+            background-color: var(--gray-600);
+        }
+        
+        .divider span {
+            padding: 0 15px;
+        }
+        
+        .message {
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.success {
+            background-color: rgba(74, 222, 128, 0.15);
+            color: var(--success-color);
+            border-left: 4px solid var(--success-color);
+            display: block;
+        }
+        
+        .message.error {
+            background-color: rgba(248, 113, 113, 0.15);
+            color: var(--error-color);
+            border-left: 4px solid var(--error-color);
+            display: block;
+        }
+        
+        .message.info {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+            border-left: 4px solid #3b82f6;
+            display: block;
+        }
+        
+        .btn-loading .btn-text {
+            display: none;
+        }
+        
+        .btn-loading .btn-loader {
+            display: inline-block;
+        }
+        
+        .btn-loader {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--gray-100);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            border: none;
+            color: var(--gray-700);
+            font-size: 1.2rem;
+        }
+        
+        body.dark-mode .theme-toggle {
+            background-color: var(--gray-700);
+            color: var(--light-color);
+        }
+        
+        .forgot-password {
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .forgot-password a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .hero-section {
+                text-align: center;
+                padding: 20px;
+            }
+            
+            .hero-section h1 {
+                font-size: 2.2rem;
+            }
+            
+            .auth-container {
+                max-width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 25px;
+            }
+            
+            .hero-section h1 {
+                font-size: 1.8rem;
+            }
+        }
+        
+        .floating-shapes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(58, 12, 163, 0.05));
+        }
+        
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            top: -100px;
+            left: -100px;
+        }
+        
+        .shape-2 {
+            width: 200px;
+            height: 200px;
+            bottom: -50px;
+            right: -50px;
+        }
+        
+        body.dark-mode .shape {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.15), rgba(58, 12, 163, 0.1));
+        }
+        
+        /* TAMBAHAN UNTUK FOTO PROFIL */
+        .profile-picture-section {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .profile-picture-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 15px;
+        }
+        
+        .profile-picture {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--gray-200);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .profile-picture:hover {
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+        
+        .profile-picture-placeholder {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gray-200), var(--gray-300));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-700);
+            font-size: 2.5rem;
+            cursor: pointer;
+            border: 3px solid var(--gray-200);
+            transition: var(--transition);
+        }
+        
+        body.dark-mode .profile-picture-placeholder {
+            background: linear-gradient(135deg, var(--gray-700), var(--gray-600));
+            color: var(--gray-300);
+            border-color: var(--gray-600);
+        }
+        
+        .profile-picture-placeholder:hover {
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+        
+        .profile-picture-upload {
+            display: none;
+        }
+        
+        .profile-picture-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+            margin-top: 5px;
+            cursor: pointer;
+        }
+        
+        body.dark-mode .profile-picture-label {
+            color: var(--gray-300);
+        }
+        
+        /* TAMBAHAN UNTUK TOMBOL SOSIAL */
+        .social-login-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-social {
+            padding: 12px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: white;
+            color: var(--gray-700);
+        }
+        
+        .btn-social:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        body.dark-mode .btn-social {
+            background-color: var(--gray-700);
+            color: var(--light-color);
+            border-color: var(--gray-600);
+        }
+        
+        body.dark-mode .btn-social:hover {
+            background-color: var(--gray-600);
+        }
+        
+        .btn-google {
+            color: #DB4437;
+        }
+        
+        .btn-facebook {
+            color: #4267B2;
+        }
+        
+        .btn-github {
+            color: #333;
+        }
+        
+        body.dark-mode .btn-github {
+            color: #f0f0f0;
+        }
+        
+        .btn-google:hover {
+            border-color: #DB4437;
+            background-color: rgba(219, 68, 55, 0.1);
+        }
+        
+        .btn-facebook:hover {
+            border-color: #4267B2;
+            background-color: rgba(66, 103, 178, 0.1);
+        }
+        
+        .btn-github:hover {
+            border-color: #333;
+            background-color: rgba(51, 51, 51, 0.1);
+        }
+        
+        body.dark-mode .btn-github:hover {
+            border-color: #f0f0f0;
+            background-color: rgba(240, 240, 240, 0.1);
+        }
+        
+        @media (max-width: 480px) {
+            .social-login-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Success Login Message */
+        .success-login {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            max-width: 450px;
+            width: 100%;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        body.dark-mode .success-login {
+            background-color: var(--gray-800);
+        }
+        
+        .success-icon {
+            font-size: 4rem;
+            color: var(--success-color);
+            margin-bottom: 20px;
+        }
+        
+        .success-login h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        
+        .success-login p {
+            color: var(--gray-700);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        body.dark-mode .success-login p {
+            color: var(--gray-300);
+        }
+        
+        .user-info {
+            background-color: var(--gray-100);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        body.dark-mode .user-info {
+            background-color: var(--gray-700);
+        }
+        
+        .user-info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .user-info-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .user-info-item i {
+            width: 20px;
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+    </div>
+    
+    <button class="theme-toggle" id="theme-toggle">
+        <i class="fas fa-moon"></i>
+    </button>
+    
+    <div class="container">
+        <div class="hero-section">
+            <div class="logo">
+                <i class="fas fa-tools"></i>
+                <span>BugemTools</span>
+            </div>
+            <h1>Kelola Alat & Data dengan Sistem Terintegrasi</h1>
+            <p>Platform manajemen alat dan database yang aman dengan autentikasi Firebase. Akses data Anda kapan saja, di mana saja dengan keamanan terjamin.</p>
+            
+            <div class="features">
+                <div class="feature">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Autentikasi aman dengan Firebase</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-bolt"></i>
+                    <span>Proses login cepat dan responsif</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>Desain responsif untuk semua perangkat</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-palette"></i>
+                    <span>Tema gelap dan terang yang nyaman</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Auth Container (Login & Register) -->
+        <div class="auth-container" id="auth-container">
+            <div class="auth-header">
+                <h2 id="auth-title">Selamat Datang Kembali</h2>
+                <p id="auth-subtitle">Masuk ke akun Anda untuk melanjutkan</p>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab-slider" id="tab-slider"></div>
+                <div class="tab active" id="login-tab">Masuk</div>
+                <div class="tab" id="register-tab">Daftar</div>
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <div class="form-container">
+                <!-- Login Form -->
+                <form id="login-form" class="form active">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <div class="input-group">
+                            <input type="email" id="login-email" placeholder="nama@contoh.com" required>
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-password">Kata Sandi</label>
+                        <div class="input-group">
+                            <input type="password" id="login-password" placeholder="Masukkan kata sandi" required>
+                            <button type="button" class="password-toggle" id="login-password-toggle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="forgot-password">
+                        <a href="#" id="forgot-password">Lupa kata sandi?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" id="login-btn">
+                        <span class="btn-text">Masuk</span>
+                        <span class="btn-loader"><i class="fas fa-spinner"></i></span>
+                    </button>
+                    
+                    <div class="divider">
+                        <span>Atau lanjutkan dengan</span>
+                    </div>
+                    
+                    <div class="social-login-buttons">
+                        <button type="button" class="btn-social btn-google" id="google-login-btn">
+                            <i class="fab fa-google"></i>
+                            <span>Google</span>
+                        </button>
+                        <button type="button" class="btn-social btn-facebook" id="facebook-login-btn">
+                            <i class="fab fa-facebook-f"></i>
+                            <span>Facebook</span>
+                        </button>
+                        <button type="button" class="btn-social btn-github" id="github-login-btn">
+                            <i class="fab fa-github"></i>
+                            <span>GitHub</span>
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Register Form -->
+                <form id="register-form" class="form">
+                    <!-- Foto Profil Section -->
+                    <div class="profile-picture-section">
+                        <div class="profile-picture-container">
+                            <div class="profile-picture-placeholder" id="profile-picture-preview">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <input type="file" id="profile-picture-upload" class="profile-picture-upload" accept="image/*">
+                        </div>
+                        <label for="profile-picture-upload" class="profile-picture-label">Klik untuk upload foto profil (Opsional)</label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-name">Nama Lengkap</label>
+                        <div class="input-group">
+                            <input type="text" id="register-name" placeholder="Nama lengkap Anda" required>
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <div class="input-group">
+                            <input type="email" id="register-email" placeholder="nama@contoh.com" required>
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-password">Kata Sandi</label>
+                        <div class="input-group">
+                            <input type="password" id="register-password" placeholder="Minimal 6 karakter" required>
+                            <button type="button" class="password-toggle" id="register-password-toggle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-confirm-password">Konfirmasi Kata Sandi</label>
+                        <div class="input-group">
+                            <input type="password" id="register-confirm-password" placeholder="Ulangi kata sandi" required>
+                            <button type="button" class="password-toggle" id="register-confirm-password-toggle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success" id="register-btn">
+                        <span class="btn-text">Daftar</span>
+                        <span class="btn-loader"><i class="fas fa-spinner"></i></span>
+                    </button>
+                    
+                    <div class="divider">
+                        <span>Atau daftar dengan</span>
+                    </div>
+                    
+                    <div class="social-login-buttons">
+                        <button type="button" class="btn-social btn-google" id="google-register-btn">
+                            <i class="fab fa-google"></i>
+                            <span>Google</span>
+                        </button>
+                        <button type="button" class="btn-social btn-facebook" id="facebook-register-btn">
+                            <i class="fab fa-facebook-f"></i>
+                            <span>Facebook</span>
+                        </button>
+                        <button type="button" class="btn-social btn-github" id="github-register-btn">
+                            <i class="fab fa-github"></i>
+                            <span>GitHub</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Success Login Message -->
+        <div class="success-login" id="success-login">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Login Berhasil!</h2>
+            <p>Anda telah berhasil masuk ke sistem BugemTools. Silahkan melanjutkan ke halaman utama.</p>
+            
+            <div class="user-info" id="user-info">
+                <!-- Info pengguna akan diisi secara dinamis -->
+            </div>
+            
+            <button class="btn btn-primary" id="go-to-index-btn">
+                <i class="fas fa-home"></i>
+                <span>Lanjutkan ke Halaman Utama</span>
+            </button>
+            
+            <div class="forgot-password" style="margin-top: 20px;">
+                <a href="#" id="logout-link">Keluar dari akun ini</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Konfigurasi Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCkWKmK_UmQtk6UEIset5e6iPmFZj0ZLHc",
+            authDomain: "bugemtoolsdb.firebaseapp.com",
+            databaseURL: "https://bugemtoolsdb-default-rtdb.firebaseio.com",
+            projectId: "bugemtoolsdb",
+            storageBucket: "bugemtoolsdb.firebasestorage.app",
+            messagingSenderId: "52270788635",
+            appId: "1:52270788635:web:59bf1c23406beb872e48be",
+            measurementId: "G-SHMYMXM4Z4"
+        };
+
+        // Inisialisasi Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // DOM Elements
+        const themeToggle = document.getElementById('theme-toggle');
+        const authContainer = document.getElementById('auth-container');
+        const successLogin = document.getElementById('success-login');
+        const authTitle = document.getElementById('auth-title');
+        const authSubtitle = document.getElementById('auth-subtitle');
+        
+        // Tab elements
+        const loginTab = document.getElementById('login-tab');
+        const registerTab = document.getElementById('register-tab');
+        const tabSlider = document.getElementById('tab-slider');
+        
+        // Form elements
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        
+        // Login form elements
+        const loginEmail = document.getElementById('login-email');
+        const loginPassword = document.getElementById('login-password');
+        const loginPasswordToggle = document.getElementById('login-password-toggle');
+        const loginBtn = document.getElementById('login-btn');
+        
+        // Register form elements
+        const registerName = document.getElementById('register-name');
+        const registerEmail = document.getElementById('register-email');
+        const registerPassword = document.getElementById('register-password');
+        const registerPasswordToggle = document.getElementById('register-password-toggle');
+        const registerConfirmPassword = document.getElementById('register-confirm-password');
+        const registerConfirmPasswordToggle = document.getElementById('register-confirm-password-toggle');
+        const registerBtn = document.getElementById('register-btn');
+        
+        // Message element
+        const messageDiv = document.getElementById('message');
+        
+        // Success elements
+        const userInfo = document.getElementById('user-info');
+        const goToIndexBtn = document.getElementById('go-to-index-btn');
+        const logoutLink = document.getElementById('logout-link');
+        
+        // Google buttons
+        const googleLoginBtn = document.getElementById('google-login-btn');
+        const googleRegisterBtn = document.getElementById('google-register-btn');
+        
+        // Facebook buttons
+        const facebookLoginBtn = document.getElementById('facebook-login-btn');
+        const facebookRegisterBtn = document.getElementById('facebook-register-btn');
+        
+        // GitHub buttons
+        const githubLoginBtn = document.getElementById('github-login-btn');
+        const githubRegisterBtn = document.getElementById('github-register-btn');
+        
+        // Forgot password
+        const forgotPassword = document.getElementById('forgot-password');
+        
+        // Profile picture elements
+        const profilePictureUpload = document.getElementById('profile-picture-upload');
+        const profilePicturePreview = document.getElementById('profile-picture-preview');
+        let profilePictureFile = null;
+
+        // Theme toggle
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const icon = themeToggle.querySelector('i');
+            if (document.body.classList.contains('dark-mode')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        });
+
+        // Tab switching
+        loginTab.addEventListener('click', () => {
+            loginTab.classList.add('active');
+            registerTab.classList.remove('active');
+            loginForm.classList.add('active');
+            registerForm.classList.remove('active');
+            tabSlider.classList.remove('register');
+            authTitle.textContent = 'Selamat Datang Kembali';
+            authSubtitle.textContent = 'Masuk ke akun Anda untuk melanjutkan';
+            clearMessage();
+        });
+
+        registerTab.addEventListener('click', () => {
+            registerTab.classList.add('active');
+            loginTab.classList.remove('active');
+            registerForm.classList.add('active');
+            loginForm.classList.remove('active');
+            tabSlider.classList.add('register');
+            authTitle.textContent = 'Buat Akun Baru';
+            authSubtitle.textContent = 'Daftar untuk mengakses semua fitur';
+            clearMessage();
+        });
+
+        // Password toggle functionality
+        function setupPasswordToggle(toggleBtn, passwordField) {
+            toggleBtn.addEventListener('click', () => {
+                const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordField.setAttribute('type', type);
+                const icon = toggleBtn.querySelector('i');
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            });
+        }
+
+        setupPasswordToggle(loginPasswordToggle, loginPassword);
+        setupPasswordToggle(registerPasswordToggle, registerPassword);
+        setupPasswordToggle(registerConfirmPasswordToggle, registerConfirmPassword);
+
+        // Show message function
+        function showMessage(type, text) {
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = text;
+            messageDiv.style.display = 'block';
+            
+            // Auto hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Clear message function
+        function clearMessage() {
+            messageDiv.style.display = 'none';
+            messageDiv.className = 'message';
+        }
+
+        // Show loading state on button
+        function setButtonLoading(button, isLoading) {
+            if (isLoading) {
+                button.classList.add('btn-loading');
+                button.disabled = true;
+            } else {
+                button.classList.remove('btn-loading');
+                button.disabled = false;
+            }
+        }
+
+        // Validate email format
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Validate password strength
+        function isValidPassword(password) {
+            return password.length >= 6;
+        }
+
+        // Login with email and password
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const email = loginEmail.value.trim();
+            const password = loginPassword.value;
+            
+            // Validation
+            if (!email || !password) {
+                showMessage('error', 'Harap isi semua kolom');
+                return;
+            }
+            
+            if (!isValidEmail(email)) {
+                showMessage('error', 'Format email tidak valid');
+                return;
+            }
+            
+            // Set loading state
+            setButtonLoading(loginBtn, true);
+            
+            // Firebase login
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Login successful
+                    showMessage('success', 'Login berhasil!');
+                    showSuccessLogin(userCredential.user);
+                    
+                    // Reset form
+                    loginForm.reset();
+                })
+                .catch((error) => {
+                    // Handle errors
+                    let errorMessage = 'Terjadi kesalahan saat login';
+                    
+                    switch (error.code) {
+                        case 'auth/user-not-found':
+                            errorMessage = 'Pengguna tidak ditemukan';
+                            break;
+                        case 'auth/wrong-password':
+                            errorMessage = 'Kata sandi salah';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = 'Email tidak valid';
+                            break;
+                        case 'auth/user-disabled':
+                            errorMessage = 'Akun dinonaktifkan';
+                            break;
+                        case 'auth/too-many-requests':
+                            errorMessage = 'Terlalu banyak percobaan. Coba lagi nanti';
+                            break;
+                    }
+                    
+                    showMessage('error', errorMessage);
+                })
+                .finally(() => {
+                    // Reset loading state
+                    setButtonLoading(loginBtn, false);
+                });
+        });
+
+        // Handle upload foto profil
+        profilePictureUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    showMessage('error', 'Ukuran file maksimal 5MB');
+                    profilePictureUpload.value = '';
+                    return;
+                }
+                
+                if (!file.type.startsWith('image/')) {
+                    showMessage('error', 'File harus berupa gambar');
+                    profilePictureUpload.value = '';
+                    return;
+                }
+                
+                profilePictureFile = file;
+                
+                // Preview gambar
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Ganti placeholder dengan gambar
+                    profilePicturePreview.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'profile-picture';
+                    profilePicturePreview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Fungsi untuk upload foto profil (simulasi)
+        function uploadProfilePicture(userId, file) {
+            return new Promise((resolve) => {
+                if (!file) {
+                    resolve(null);
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const photoURL = e.target.result;
+                    resolve(photoURL);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Register with email and password
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = registerName.value.trim();
+            const email = registerEmail.value.trim();
+            const password = registerPassword.value;
+            const confirmPassword = registerConfirmPassword.value;
+            
+            // Validation
+            if (!name || !email || !password || !confirmPassword) {
+                showMessage('error', 'Harap isi semua kolom');
+                return;
+            }
+            
+            if (!isValidEmail(email)) {
+                showMessage('error', 'Format email tidak valid');
+                return;
+            }
+            
+            if (!isValidPassword(password)) {
+                showMessage('error', 'Kata sandi minimal 6 karakter');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showMessage('error', 'Kata sandi tidak cocok');
+                return;
+            }
+            
+            // Set loading state
+            setButtonLoading(registerBtn, true);
+            
+            try {
+                // Firebase registration
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                
+                // Upload foto profil jika ada
+                let photoURL = null;
+                if (profilePictureFile) {
+                    photoURL = await uploadProfilePicture(userCredential.user.uid, profilePictureFile);
+                }
+                
+                // Update user profile dengan nama dan foto
+                await userCredential.user.updateProfile({
+                    displayName: name,
+                    photoURL: photoURL
+                });
+                
+                showMessage('success', 'Pendaftaran berhasil! Akun telah dibuat.');
+                showSuccessLogin(userCredential.user);
+                
+                // Clear form
+                registerForm.reset();
+                // Reset foto profil preview
+                profilePictureFile = null;
+                profilePicturePreview.innerHTML = '<i class="fas fa-user-plus"></i>';
+                
+            } catch (error) {
+                // Handle errors
+                let errorMessage = 'Terjadi kesalahan saat pendaftaran';
+                
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'Email sudah terdaftar';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'Email tidak valid';
+                        break;
+                    case 'auth/operation-not-allowed':
+                        errorMessage = 'Operasi tidak diizinkan';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'Kata sandi terlalu lemah';
+                        break;
+                }
+                
+                showMessage('error', errorMessage);
+            } finally {
+                // Reset loading state
+                setButtonLoading(registerBtn, false);
+            }
+        });
+
+        // Google authentication
+        function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    showMessage('success', 'Login dengan Google berhasil!');
+                    showSuccessLogin(result.user);
+                })
+                .catch((error) => {
+                    console.error(error);
+                    showMessage('error', 'Login dengan Google gagal');
+                });
+        }
+
+        // Facebook authentication
+        function signInWithFacebook() {
+            const provider = new firebase.auth.FacebookAuthProvider();
+            provider.addScope('email');
+            
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    showMessage('success', 'Login dengan Facebook berhasil!');
+                    showSuccessLogin(result.user);
+                })
+                .catch((error) => {
+                    console.error(error);
+                    let errorMessage = 'Login dengan Facebook gagal';
+                    
+                    if (error.code === 'auth/account-exists-with-different-credential') {
+                        errorMessage = 'Akun sudah terdaftar dengan metode login lain';
+                    }
+                    
+                    showMessage('error', errorMessage);
+                });
+        }
+
+        // GitHub authentication
+        function signInWithGitHub() {
+            const provider = new firebase.auth.GithubAuthProvider();
+            provider.addScope('user');
+            
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    showMessage('success', 'Login dengan GitHub berhasil!');
+                    showSuccessLogin(result.user);
+                })
+                .catch((error) => {
+                    console.error(error);
+                    let errorMessage = 'Login dengan GitHub gagal';
+                    
+                    if (error.code === 'auth/account-exists-with-different-credential') {
+                        errorMessage = 'Akun sudah terdaftar dengan metode login lain';
+                    }
+                    
+                    showMessage('error', errorMessage);
+                });
+        }
+
+        // Event listeners untuk tombol sosial
+        googleLoginBtn.addEventListener('click', signInWithGoogle);
+        googleRegisterBtn.addEventListener('click', signInWithGoogle);
+        facebookLoginBtn.addEventListener('click', signInWithFacebook);
+        facebookRegisterBtn.addEventListener('click', signInWithFacebook);
+        githubLoginBtn.addEventListener('click', signInWithGitHub);
+        githubRegisterBtn.addEventListener('click', signInWithGitHub);
+
+        // Forgot password
+        forgotPassword.addEventListener('click', (e) => {
+            e.preventDefault();
+            const email = prompt("Masukkan email Anda untuk reset kata sandi:");
+            
+            if (email && isValidEmail(email)) {
+                auth.sendPasswordResetEmail(email)
+                    .then(() => {
+                        showMessage('success', 'Email reset kata sandi telah dikirim. Periksa inbox Anda.');
+                    })
+                    .catch((error) => {
+                        showMessage('error', 'Gagal mengirim email reset. Pastikan email terdaftar.');
+                    });
+            } else if (email) {
+                showMessage('error', 'Format email tidak valid');
+            }
+        });
+
+        // Go to index.html
+        goToIndexBtn.addEventListener('click', () => {
+            // Redirect ke index.html
+            window.location.href = 'index.html';
+        });
+
+        // Logout link
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            auth.signOut()
+                .then(() => {
+                    showAuthContainer();
+                })
+                .catch((error) => {
+                    console.error('Logout error:', error);
+                });
+        });
+
+        // Show success login
+        function showSuccessLogin(user) {
+            // Update user info
+            const displayName = user.displayName || 'Pengguna';
+            const email = user.email || 'Tidak ada email';
+            const provider = user.providerData[0]?.providerId || 'email';
+            
+            // Tampilkan info pengguna
+            userInfo.innerHTML = `
+                <div class="user-info-item">
+                    <i class="fas fa-user"></i>
+                    <span><strong>Nama:</strong> ${displayName}</span>
+                </div>
+                <div class="user-info-item">
+                    <i class="fas fa-envelope"></i>
+                    <span><strong>Email:</strong> ${email}</span>
+                </div>
+                <div class="user-info-item">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span><strong>Login dengan:</strong> ${getProviderName(provider)}</span>
+                </div>
+            `;
+            
+            // Simpan data user di localStorage untuk digunakan di index.html
+            localStorage.setItem('user', JSON.stringify({
+                displayName: displayName,
+                email: email,
+                photoURL: user.photoURL
+            }));
+            
+            // Show success message, hide auth container
+            authContainer.style.display = 'none';
+            successLogin.style.display = 'block';
+        }
+
+        // Helper function untuk nama provider
+        function getProviderName(providerId) {
+            switch(providerId) {
+                case 'google.com': return 'Google';
+                case 'facebook.com': return 'Facebook';
+                case 'github.com': return 'GitHub';
+                case 'password': return 'Email & Password';
+                default: return providerId;
+            }
+        }
+
+        // Show auth container
+        function showAuthContainer() {
+            successLogin.style.display = 'none';
+            authContainer.style.display = 'block';
+            clearMessage();
+            
+            // Reset to login form
+            loginTab.click();
+            
+            // Reset foto profil
+            profilePictureFile = null;
+            profilePicturePreview.innerHTML = '<i class="fas fa-user-plus"></i>';
+        }
+
+        // Check auth state on page load
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // User is signed in
+                showSuccessLogin(user);
+            } else {
+                // User is signed out
+                showAuthContainer();
+            }
+        });
+
+        // Initialize with sample data for demo
+        window.addEventListener('DOMContentLoaded', () => {
+            // Add sample data for testing
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                loginEmail.value = 'demo@bugemtools.com';
+                loginPassword.value = 'demo123';
+                
+                registerName.value = 'Ahmad Santoso';
+                registerEmail.value = 'ahmad@contoh.com';
+                registerPassword.value = 'password123';
+                registerConfirmPassword.value = 'password123';
+            }
+            
+            // Initialize theme based on user preference
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.body.classList.add('dark-mode');
+                const icon = themeToggle.querySelector('i');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        });
+    </script>
+</body>
+</html>
